@@ -5,6 +5,9 @@ import path from 'path';
 import fs from 'fs';
 const app = express();
 const port = 3000;
+import bodyParser from 'body-parser';
+
+app.use(bodyParser.json());
 
 const uploadDir = path.join(__dirname, '../uploads');
 
@@ -14,6 +17,16 @@ app.get('/', (_req : express.Request, res : express.Response) => {
     message: 'Hello World!',
     hostname: os.hostname(),
     platform: os.platform(),
+  });
+});
+
+app.post('/message', (req: express.Request, res: express.Response) => {
+  const { message } = req.body;
+
+  console.log(`Received message: ${message}`);
+
+  res.status(200).json({
+    message: `You sent: ${message}`,
   });
 });
 

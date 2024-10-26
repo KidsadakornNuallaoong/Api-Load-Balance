@@ -7,6 +7,8 @@ services:
       dockerfile: Dockerfile
     environment:
       NODE_ENV: production
+    volumes:
+      - ./uploads:/app/uploads
 
   nginx:
     image: nginx:latest
