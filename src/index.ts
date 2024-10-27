@@ -1,5 +1,5 @@
 import express from 'express';
-import os from 'os';
+import os, { hostname } from 'os';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -33,6 +33,19 @@ app.post('/message', (req: express.Request, res: express.Response) => {
 // path to upload huge file
 const upload = multer({ dest: 'uploads/' });
 
+app.post('/upload', upload.single('file'), (req: express.Request & { file?: Express.Multer.File }, res: express.Response) => {
+  const newFilename = req.file?.originalname || `file_${Date.now()}${path.extname(req.file?.originalname || '')}`;
+  const newPath = path.join(uploadDir, newFilename);
+  fs.renameSync(req.file?.path || '', newPath);
+
+  res.status(200).json({
+    message: 'File uploaded successfully!',
+    file: req.file,
+    filename: newFilename,
+    hostname: os.hostname(),
+  });
+});
+
 app.post('/image/upload', upload.single('image'), (req: express.Request & { file?: Express.Multer.File }, res: express.Response) => {
   const newFilename = req.file?.originalname || `image_${Date.now()}${path.extname(req.file?.originalname || '')}`;
   const newPath = path.join(uploadDir, newFilename);
@@ -42,6 +55,7 @@ app.post('/image/upload', upload.single('image'), (req: express.Request & { file
     message: 'Image uploaded successfully!',
     file: req.file,
     filename: newFilename,
+    hostname: os.hostname(),
   });
 });
 
@@ -54,24 +68,11 @@ app.post('/video/upload', upload.single('video'), (req: express.Request & { file
     message: 'Video uploaded successfully!',
     file: req.file,
     filename: newFilename,
+    hostname: os.hostname(),
   });
 });
 
-app.get('/image/:filename', (req: express.Request, res: express.Response) => {
-  const { filename } = req.params;
-  const filePath = path.join(uploadDir, filename);
-
-  try {
-    if (fs.existsSync(filePath)) {
-      res.status(200).sendFile(filePath);
-  }} catch (error) {
-    res.status(404).json({
-      message: 'File not found',
-    });
-  }
-});
-
-app.get('/video/:filename', (req: express.Request, res: express.Response) => {
+app.get('/keep/:filename', (req: express.Request, res: express.Response) => {
   const { filename } = req.params;
   const filePath = path.join(uploadDir, filename);
 
