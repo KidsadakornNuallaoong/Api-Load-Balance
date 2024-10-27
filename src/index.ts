@@ -60,14 +60,27 @@ app.post('/video/upload', upload.single('video'), (req: express.Request & { file
 app.get('/image/:filename', (req: express.Request, res: express.Response) => {
   const { filename } = req.params;
   const filePath = path.join(uploadDir, filename);
-  const fileExists = fs.existsSync(filePath);
 
-  if (fileExists) {
-    res.status(200).sendFile(filePath);
-  }
-  else {
+  try {
+    if (fs.existsSync(filePath)) {
+      res.status(200).sendFile(filePath);
+  }} catch (error) {
     res.status(404).json({
-      message: 'File not found!',
+      message: 'File not found',
+    });
+  }
+});
+
+app.get('/video/:filename', (req: express.Request, res: express.Response) => {
+  const { filename } = req.params;
+  const filePath = path.join(uploadDir, filename);
+
+  try {
+    if (fs.existsSync(filePath)) {
+      res.status(200).sendFile(filePath);
+  }} catch (error) {
+    res.status(404).json({
+      message: 'File not found',
     });
   }
 });
